@@ -71,8 +71,7 @@ Consumer
 
 ### Environments
 
-- Create `.env.development` and set on api services;
-- Create `.env.local` and set on api services;
+- Create `.env` and set on api services;
 
 ---
 
