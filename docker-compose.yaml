@@ -1,0 +1,92 @@
+version: "3"
+
+networks:
+  network-applications:
+
+services:
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: ./packages/server
+    command: "sh -c 'yarn install && yarn run start:dev'"
+    ports:
+      - 3000:3000
+    volumes:
+      - ./packages/server:/home/node/app
+    depends_on:
+      - control-center
+    networks:
+      - network-applications
+
+  micro-payment:
+    build:
+      dockerfile: Dockerfile
+      context: ./packages/micro-payment
+    command: "sh -c 'yarn install && yarn run start:dev'"
+    ports:
+      - 3002:3002
+    volumes:
+      - ./packages/micro-payment:/home/node/app
+    depends_on:
+      - control-center
+    networks:
+      - network-applications
+
+  db:
+    image: postgres:latest
+    restart: always
+    user: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: db_mini_bank
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+    volumes:
+      - volume_name:/var/lib/postgresql/data
+    networks:
+      - network-applications
+
+  zookeeper: # brokers
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    networks:
+      - network-applications
+
+  kafka: # broker kafka
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_LISTENERS: INTERNAL://:9092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT
+    networks:
+      - network-applications
+
+  control-center: # clusters on browser
+    image: confluentinc/cp-enterprise-control-center:6.0.1
+    hostname: control-center
+    depends_on:
+      - kafka
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: "kafka:9092"
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      PORT: 9021
+    networks:
+      - network-applications
+
+volumes:
+  volume_name:
+    name: volume_name
