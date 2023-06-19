@@ -29,6 +29,10 @@
 
 ## :rocket: Development
 
+```console
+❯ sudo docker-compose up -d
+```
+
 ### Commands backend
 
 ```console
@@ -41,6 +45,12 @@ Open app application in bash in src folder project
 ❯ sudo docker-compose exec app sh
 ❯ nest g resource resource-name
 ❯ nest g service service-name
+```
+
+### Commands frontend
+
+```console
+❯ yarn dev
 ```
 
 ### Documentation API
@@ -61,12 +71,6 @@ Consumer
 ```console
 ❯ sudo docker-compose exec kafka bash
 ❯ kafka-console-consumer --topic topic-name --bootstrap-server localhost:9092
-```
-
-### Commands frontend
-
-```console
-❯ yarn dev
 ```
 
 ### Environments
