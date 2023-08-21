@@ -23,9 +23,9 @@
 - [x] Add typescript
 - [x] Create configuration process env
 - [x] Send emails to the payee of the transaction
-- [ ] Tests on projects
-- [ ] Create microservices to send emails
 - [ ] Create frontend
+- [ ] Create microservices to send emails
+- [ ] Tests on projects
 
 ## :rocket: Development
 
