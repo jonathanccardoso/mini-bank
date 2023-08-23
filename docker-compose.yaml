@@ -4,7 +4,7 @@ networks:
   network-applications:
 
 services:
-  app:
+  server:
     build:
       dockerfile: Dockerfile
       context: ./packages/server
@@ -13,6 +13,20 @@ services:
       - 3000:3000
     volumes:
       - ./packages/server:/home/node/app
+    depends_on:
+      - control-center
+    networks:
+      - network-applications
+
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: ./packages/app
+    command: "sh -c 'yarn install && yarn run dev'"
+    ports:
+      - 3001:3001
+    volumes:
+      - ./packages/app:/home/node/app
     depends_on:
       - control-center
     networks:
@@ -90,3 +104,4 @@ services:
 volumes:
   volume_name:
     name: volume_name
+    driver: local

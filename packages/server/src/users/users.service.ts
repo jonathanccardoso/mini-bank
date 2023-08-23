@@ -29,6 +29,14 @@ export class UsersService {
     return this.userModel.findByPk(id, { rejectOnEmpty: true });
   }
 
+  findOneByCpfCnpj(cpfCnpj: string) {
+    return this.userModel.findOne({
+      where: {
+        cpfCnpj,
+      },
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
     user.update({

@@ -24,18 +24,26 @@
 - [x] Create configuration process env
 - [x] Send emails to the payee of the transaction
 - [ ] Create frontend
+- [ ] Add websocket
 - [ ] Create microservices to send emails
-- [ ] Tests on projects
+
+## Future features
+
+- [] Change db to mongoDB
+- [] Apply tests both backend and frontend
+- [] Apply Design Patterns and Clean Architecture
+- [] Deploy applications
 
 ## :rocket: Development
 
 ```console
-❯ sudo docker-compose up -d
+❯ sudo docker-compose up --build -d
 ```
 
 ### Commands backend
 
 ```console
+❯ yarn install
 ❯ yarn server
 ```
 
