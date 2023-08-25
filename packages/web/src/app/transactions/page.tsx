@@ -1,5 +1,11 @@
+'use client';
+
 import useSwr from "swr";
+import { useEffect } from "react";
 import { fetcher } from "../utils/http";
+import { socket } from "../utils/socket-io";
+import { ITransaction } from "../interfaces";
+import { Button, Typography } from "@mui/material";
 
 export function TransactionsPage() {
 
@@ -7,9 +13,23 @@ export function TransactionsPage() {
     data: transactions,
     error,
     isLoading,
-  } = useSwr<any>("http://localhost:3000/routes", fetcher, {
+  } = useSwr<any>("http://server:3000/routes", fetcher, {
     fallbackData: [],
   });
+
+  useEffect(() => {
+    socket.connect();
+    
+    socket.on("admin-new-transactions", (data: ITransaction) => {
+      if (data.id) {
+        transactions.push(data);
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    }
+  }, [transactions]);
 
   // show transactions and possible view details by modal section
 
@@ -22,12 +42,19 @@ export function TransactionsPage() {
         width: "100%",
       }}
     >
-      <h1>Transactions</h1>
-      {transactions!.map((transaction: any) => (
-        <div key={transaction.id}>
-          {transaction.name}
-        </div>
-      ))}
+      <Typography variant="h4">Transactions</Typography>
+      <div>
+        {isLoading && <p>Loading ...</p>}
+        {transactions!.map((transaction: any) => (
+          <div key={transaction.id}>
+            {transaction.name}
+
+            <Button variant="contained">
+              View details
+            </Button>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
