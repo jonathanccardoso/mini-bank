@@ -3,12 +3,12 @@ import { AccountsService } from './accounts.service';
 import { AccountsController } from './accounts.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { Account } from './entities/account.entity';
-import { UsersService } from 'src/users/users.service';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
-  imports: [SequelizeModule.forFeature([Account])],
+  imports: [SequelizeModule.forFeature([Account]), UsersModule],
   controllers: [AccountsController],
-  providers: [AccountsService, UsersService],
+  providers: [AccountsService],
   exports: [AccountsService],
 })
 export class AccountsModule {}
