@@ -22,18 +22,15 @@ export class AccountsController {
   }
 
   @Get()
-  findAll() {
-    return this.accountsService.findAll();
+  findAll(@Query() queryParams: { cpjCnpj?: string }) {
+    const { cpjCnpj } = queryParams;
+    return this.accountsService.findAll(cpjCnpj);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+    console.log('findOne');
     return this.accountsService.findOne(id);
-  }
-
-  @Get()
-  findOneByCpfCnpj(@Query('cpjCnpj') cpjCnpj: string) {
-    return this.accountsService.findOneByCpfCnpj(cpjCnpj);
   }
 
   @Patch(':id')

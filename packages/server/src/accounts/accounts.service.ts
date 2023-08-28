@@ -24,7 +24,9 @@ export class AccountsService {
     });
   }
 
-  findAll() {
+  findAll(cpjCnpj?: string) {
+    if (cpjCnpj) return this.findOneByCpfCnpj(cpjCnpj);
+
     return this.accountModel.findAll();
   }
 
@@ -33,13 +35,13 @@ export class AccountsService {
   }
 
   async findOneByCpfCnpj(cpfCnpj: string) {
-    const { id: userId } = await this.usersService.findOneByCpfCnpj(cpfCnpj);
-    if (!userId) throw new Error('User not found!');
+    const user = await this.usersService.findOneByCpfCnpj(cpfCnpj);
+    if (!user) throw new Error('User not found!');
 
-    console.log('userId', userId);
+    console.log('user', user);
     return this.accountModel.findOne({
       where: {
-        userId,
+        userId: user.id,
       },
     });
   }
