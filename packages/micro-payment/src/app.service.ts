@@ -124,7 +124,6 @@ export class AppService {
             throw new Error(`Error on update information: ${err}`);
           }
         } else {
-          // FIXME: resend the body to kafka in topic respective
           throw new Error('Unauthorized payment transaction process!');
         }
       })

@@ -23,9 +23,9 @@
 - [x] Add typescript
 - [x] Create configuration process env
 - [x] Send emails to the payee of the transaction
-- [ ] Create frontend
-- [ ] Add websocket
-- [ ] Create microservices to send emails
+- [x] Create frontend
+- [x] Add websocket
+- [x] Add monitoring with prometheus in port `http://localhost:9090/metrics` consumer infos from `http://localhost:3000/metrics` and grafana `http://localhost:4000`
 
 ## Future features
 

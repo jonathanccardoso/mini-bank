@@ -15,15 +15,15 @@ services:
     networks:
       - network-applications
 
-  app:
+  web:
     build:
       dockerfile: Dockerfile
-      context: ./packages/app
+      context: ./packages/web
     command: "sh -c 'yarn install && yarn run dev'"
     ports:
       - 3001:3001
     volumes:
-      - ./packages/app:/home/node/app
+      - ./packages/web:/home/node/web
     depends_on:
       - control-center
     networks:
@@ -99,10 +99,39 @@ services:
     networks:
       - network-applications
 
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./packages/prometheus:/etc/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      - network-applications
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "4000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - network-applications
+
 volumes:
   volume_name:
     name: volume_name
     driver: local
+  grafana-storage:
+  prometheus-storage:
 
 networks:
   network-applications:
