@@ -2,12 +2,14 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { socket } from "../utils/socket-io";
-import { Alert, Button, Card, CardActions, CardContent, List, ListItem, ListItemText, Snackbar, TextField, TextareaAutosize, Typography } from "@mui/material";
+import { Alert, Button, Card, CardActions, CardContent, List, ListItem, Snackbar, TextField, TextareaAutosize, Typography } from "@mui/material";
+import { ITransaction, TypeStatusEnum } from "../interfaces";
 
 export function NewTransactionPage() {
   const [accountPayerId, setAccountPayerId] = useState<string>('');
   const [accountPayeeId, setAccountPayeeId] = useState<string>('');
-  const [open, setOpen] = useState(false);
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const [openError, setOpenError] = useState(false);
 
   useEffect(() => {
     socket.connect();
@@ -30,27 +32,25 @@ export function NewTransactionPage() {
       fetch(`http://localhost:3001/api/accounts?cpjCnpj=${userCpfCnpjPayer}`),
       fetch(`http://localhost:3001/api/accounts?cpjCnpj=${userCpfCnpjPayee}`)
     ])
-    console.log(accountPayerResponse, accountPayeeResponse);
 
-    const [payerId, payeeId] = await Promise.all([
-      accountPayerResponse?.id,
-      accountPayeeResponse?.id
+    const [payer, payee] = await Promise.all([
+      accountPayerResponse.json(),
+      accountPayeeResponse.json()
     ])
-    console.log(payerId, payeeId);
     
-    if (!payerId) {
+    if (!payer) {
       console.error(accountPayerResponse);
       alert('Its not possible find user payer');
       return;
     }
-    if (!payeeId) {
+    if (!payee) {
       console.error(accountPayeeResponse);
       alert('Its not possible find user payee');
       return;
     }
     
-    setAccountPayerId(payerId);
-    setAccountPayeeId(payeeId);
+    setAccountPayerId(payer.id);
+    setAccountPayeeId(payee.id);
   }
 
   async function createTransaction(event: FormEvent) {
@@ -64,20 +64,36 @@ export function NewTransactionPage() {
     console.log('transactionAmount', transactionAmount);
     console.log('transactionReason', transactionReason);
 
-    // FIXME: add http method POST to create transaction
-
-    // FIXME: get infos valid
-    socket.emit("new-transations", {
-      id: "ab72451e-6d9f-4e12-a676-da0dc0bc0265",
-      accountPayerId: "ab72451e-6d9f-4e12-a676-da0dc0bc0265",
-      accountPayeeId: "64afb7cd-18e8-418e-8b07-f729dbe5f88f",
-      amount: 1.00,
-      date: "13/06/2023",
-      reason: "Pagas as contas de luz...",
-      status: "In progress"
+    const transactionResponse = await fetch(`http://localhost:3001/api/transactions`, {
+      method: 'POST',
+      body: JSON.stringify({
+        accountPayerId: accountPayerId,
+        accountPayeeId: accountPayeeId,
+        amount: Number(transactionAmount),
+        date: new Date().toLocaleDateString(),
+        reason: transactionReason,
+        status: TypeStatusEnum.InProgress
+      })
     });
 
-    setOpen(true);
+    const transaction: ITransaction = await transactionResponse.json();
+    console.log('transaction', transaction);
+    if (!transaction) {
+      setOpenError(true);      
+      return;
+    }
+
+    socket.emit("new-transations", {
+      id: transaction.id,
+      accountPayerId: transaction.accountPayerId,
+      accountPayeeId: transaction.accountPayeeId,
+      amount: Number(transaction.amount),
+      date: transaction.date,
+      reason: transaction.reason,
+      status: transaction.status
+    });
+
+    setOpenSuccess(true);
   }
 
   return (
@@ -119,12 +135,21 @@ export function NewTransactionPage() {
         }
       </form>
       <Snackbar
-        open={open}
+        open={openSuccess}
         autoHideDuration={3000}
-        onClose={() => setOpen(false)}
+        onClose={() => setOpenSuccess(false)}
       >
-        <Alert onClose={() => setOpen(false)} severity="success">
+        <Alert onClose={() => setOpenSuccess(false)} severity="success">
           Transaction created successfully
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={openError}
+        autoHideDuration={3000}
+        onClose={() => setOpenError(false)}
+      >
+        <Alert onClose={() => setOpenError(false)} severity="success">
+          Error creating transaction
         </Alert>
       </Snackbar>
     </div>
