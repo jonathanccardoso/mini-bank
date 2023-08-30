@@ -23,11 +23,11 @@ export function TransactionsPage() {
   const [openModal, setOpenModal] = useState(false);
   const [transactionSelected, setTransactionSelected] = useState<ITransaction>({} as ITransaction);
   
-  const {
+  let {
     data: transactions,
     error,
     isLoading,
-  } = useSwr<any>("http://server:3000/routes", fetcher, {
+  } = useSwr<any>("http://localhost:3001/api/transactions", fetcher, {
     fallbackData: [],
   });
 
@@ -36,6 +36,7 @@ export function TransactionsPage() {
     
     // FIXME: resolve problem socket.io
     socket.on("admin-new-transactions", (data: ITransaction) => {
+      console.log('admin-new-transactions', data);
       if (data.id) {
         transactions.push(data);
       }
@@ -58,25 +59,27 @@ export function TransactionsPage() {
     <div
       style={{
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "column",
         height: "100%",
         width: "100%",
       }}
     >
       <Typography variant="h4">Transactions</Typography>
       <div>
+        <br />
         {isLoading && <p>Loading ...</p>}
-        {transactions!.map((transaction: any) => (
-          <div key={transaction.id}>
-            {transaction.name}
-
-            <Button
-              variant="contained"
-              onClick={() => handleSelectedTransaction(transaction)}
-            >
-              View details
-            </Button>
-          </div>
+        {transactions?.map((transaction: any) => (
+          <>
+            <div key={transaction.id}>
+              {transaction.reason}
+              <Button
+                variant="contained"
+                onClick={() => handleSelectedTransaction(transaction)}
+              >
+                View details
+              </Button>
+            </div> <br />
+          </>
         ))}
       </div>
 
@@ -90,13 +93,13 @@ export function TransactionsPage() {
           <Typography id="modal-modal-title" variant="h6" component="h2">
             Details Transaction
           </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            {transactionSelected.id} <br />
-            {transactionSelected.accountPayerId} <br />
-            {transactionSelected.accountPayeeId} <br />
-            {transactionSelected.date} <br />
-            {transactionSelected.reason} <br />
-            {transactionSelected.status} <br />
+          <Typography variant="subtitle1" id="modal-modal-description" sx={{ mt: 2 }}>
+            <p>id: {transactionSelected.id} </p>
+            <p>accountPayerId: {transactionSelected.accountPayerId} </p>
+            <p>accountPayeeId: {transactionSelected.accountPayeeId} </p>
+            <p>date: {transactionSelected.date} </p>
+            <p>reason: {transactionSelected.reason} </p>
+            <p>status: {transactionSelected.status} </p>
           </Typography>
         </Box>
       </Modal>
