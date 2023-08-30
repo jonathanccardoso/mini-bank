@@ -1,6 +1,6 @@
 # Mini Bank
 
-> Introductory project to microservices and queue management with Kafka.
+> Introductory project to microservices, metrics and queue management with Kafka.
 
 ## Structure
 
@@ -11,10 +11,13 @@
 ## :zap: Technologies
 
 - [NestJS](https://nestjs.com/)
-- [Kafka](https://kafka.apache.org/)
-- [PostgreSQL](https://www.postgresql.org/)
 - [Typescript](https://www.typescriptlang.org/)
 - [NextJS](https://nextjs.org/)
+- [Kafka](https://kafka.apache.org/)
+- [PostgreSQL](https://www.postgresql.org/)
+- [Grafana](https://grafana.com/)
+- [Prometheus](https://prometheus.io/)
+- [SocketIO](https://socket.io/pt-br/get-started/chat)
 
 ## Pending features
 
@@ -25,7 +28,9 @@
 - [x] Send emails to the payee of the transaction
 - [x] Create frontend
 - [x] Add websocket
-- [x] Add monitoring with prometheus in port `http://localhost:9090/metrics` consumer infos from `http://localhost:3000/metrics` and grafana `http://localhost:4000`
+- [x] Add monitoring with prometheus in port `http://localhost:9090` consumer infos from `http://localhost:3000/metrics` and grafana `http://localhost:4000`
+
+Obs: more details about system in [ASSETS FOLDER](./assets/).
 
 ## Future features
 
