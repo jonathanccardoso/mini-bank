@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -26,6 +27,7 @@ import { Transaction } from './transactions/entities/transaction.entity';
     UsersModule,
     TransactionsModule,
     AccountsModule,
+    PrometheusModule.register(),
   ], // register others modules
   controllers: [AppController],
   providers: [AppService],

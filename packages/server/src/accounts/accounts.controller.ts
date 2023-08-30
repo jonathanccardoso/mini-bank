@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { AccountsService } from './accounts.service';
 import { CreateAccountDto } from './dto/create-account.dto';
@@ -21,12 +22,14 @@ export class AccountsController {
   }
 
   @Get()
-  findAll() {
-    return this.accountsService.findAll();
+  findAll(@Query() queryParams: { cpjCnpj?: string }) {
+    const { cpjCnpj } = queryParams;
+    return this.accountsService.findAll(cpjCnpj);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+    console.log('findOne');
     return this.accountsService.findOne(id);
   }
 

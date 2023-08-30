@@ -6,6 +6,8 @@ import { TransactionsService } from './transactions.service';
 import { TransactionsController } from './transactions.controller';
 import { AccountsModule } from 'src/accounts/accounts.module';
 import { Transaction } from './entities/transaction.entity';
+import { TransactionsGateway } from './transactions/transactions.gateway';
+import { makeCounterProvider } from '@willsoto/nestjs-prometheus';
 
 @Module({
   imports: [
@@ -33,6 +35,15 @@ import { Transaction } from './entities/transaction.entity';
       },
       inject: ['KAFKA_SERVICE'],
     },
+    TransactionsGateway,
+    makeCounterProvider({
+      name: 'transaction_started_counter',
+      help: 'Number of transactions started',
+    }),
+    makeCounterProvider({
+      name: 'transaction_finished_counter',
+      help: 'Number of transactions finished',
+    }),
   ],
 })
 export class TransactionsModule {}

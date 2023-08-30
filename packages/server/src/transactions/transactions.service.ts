@@ -1,12 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Producer } from 'kafkajs';
-
+import { Counter } from 'prom-client';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { AccountsService } from 'src/accounts/accounts.service';
 import { TypeStatusEnum } from './interfaces';
 import { Transaction } from './entities/transaction.entity';
+import { InjectMetric } from '@willsoto/nestjs-prometheus';
 
 @Injectable()
 export class TransactionsService {
@@ -17,6 +18,10 @@ export class TransactionsService {
     private kafkaProducer: Producer,
     @Inject(AccountsService)
     private readonly accountsService: AccountsService,
+    @InjectMetric('transaction_started_counter')
+    private transactionStartedCounter: Counter,
+    @InjectMetric('transaction_finished_counter')
+    private transactionFinishedCounter: Counter,
   ) {}
 
   async create(createTransactionDto: CreateTransactionDto) {
@@ -37,6 +42,8 @@ export class TransactionsService {
       reason: createTransactionDto.reason,
       status: TypeStatusEnum.InProgress,
     });
+
+    this.transactionStartedCounter.inc();
 
     await this.kafkaProducer.send({
       topic: 'topic-transaction',
@@ -64,6 +71,10 @@ export class TransactionsService {
       reason: updateTransactionDto.reason,
       status: updateTransactionDto.status,
     });
+
+    if (transaction.status !== TypeStatusEnum.InProgress) {
+      this.transactionFinishedCounter.inc();
+    }
   }
 
   async remove(id: string) {

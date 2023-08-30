@@ -1,10 +1,7 @@
 version: "3"
 
-networks:
-  network-applications:
-
 services:
-  app:
+  server:
     build:
       dockerfile: Dockerfile
       context: ./packages/server
@@ -13,6 +10,20 @@ services:
       - 3000:3000
     volumes:
       - ./packages/server:/home/node/app
+    depends_on:
+      - control-center
+    networks:
+      - network-applications
+
+  web:
+    build:
+      dockerfile: Dockerfile
+      context: ./packages/web
+    command: "sh -c 'yarn install && yarn run dev'"
+    ports:
+      - 3001:3001
+    volumes:
+      - ./packages/web:/home/node/web
     depends_on:
       - control-center
     networks:
@@ -62,19 +73,20 @@ services:
       - zookeeper
     ports:
       - 9092:9092
+      - 9094:9094
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
-      KAFKA_LISTENERS: INTERNAL://:9092
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://:9092,OUTSIDE://:9094
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,OUTSIDE://:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT, OUTSIDE:PLAINTEXT
     networks:
       - network-applications
 
   control-center: # clusters on browser
-    image: confluentinc/cp-enterprise-control-center:6.0.1
+    image: confluentinc/cp-enterprise-control-center:7.3.1
     hostname: control-center
     depends_on:
       - kafka
@@ -87,6 +99,40 @@ services:
     networks:
       - network-applications
 
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./packages/prometheus:/etc/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      - network-applications
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "4000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - network-applications
+
 volumes:
   volume_name:
     name: volume_name
+    driver: local
+  grafana-storage:
+  prometheus-storage:
+
+networks:
+  network-applications:
+    external: true

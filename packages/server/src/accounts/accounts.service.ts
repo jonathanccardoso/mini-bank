@@ -3,12 +3,14 @@ import { CreateAccountDto } from './dto/create-account.dto';
 import { UpdateAccountDto } from './dto/update-account.dto';
 import { Account } from './entities/account.entity';
 import { InjectModel } from '@nestjs/sequelize';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AccountsService {
   constructor(
     @InjectModel(Account)
     private accountModel: typeof Account,
+    private readonly usersService: UsersService,
   ) {}
 
   create(createAccountDto: CreateAccountDto) {
@@ -22,12 +24,26 @@ export class AccountsService {
     });
   }
 
-  findAll() {
+  findAll(cpjCnpj?: string) {
+    if (cpjCnpj) return this.findOneByCpfCnpj(cpjCnpj);
+
     return this.accountModel.findAll();
   }
 
   findOne(id: string) {
     return this.accountModel.findByPk(id, { rejectOnEmpty: true });
+  }
+
+  async findOneByCpfCnpj(cpfCnpj: string) {
+    const user = await this.usersService.findOneByCpfCnpj(cpfCnpj);
+    if (!user) throw new Error('User not found!');
+
+    console.log('user', user);
+    return this.accountModel.findOne({
+      where: {
+        userId: user.id,
+      },
+    });
   }
 
   async update(id: string, updateAccountDto: UpdateAccountDto) {

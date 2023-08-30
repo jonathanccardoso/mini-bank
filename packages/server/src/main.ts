@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   app.useGlobalPipes(new ValidationPipe({ errorHttpStatusCode: 422 }));
 
   const config = new DocumentBuilder()
